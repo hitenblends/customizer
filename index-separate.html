@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTF Design Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="dtf-tool" class="dtf-container">
+        <!-- Header -->
+        <div class="dtf-header">
+            <h1>Design Preparation Tool</h1>
+            <div class="dtf-upload-section">
+                <input type="file" id="dtf-file-input" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="dtf-file-input">
+                <label for="dtf-file-input" class="dtf-upload-btn">Upload Design</label>
+                <button id="dtf-reset-btn" class="dtf-reset-btn" style="display: none;">Reset</button>
+            </div>
+            <div id="dtf-file-info" class="dtf-file-info" style="display: none;"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dtf-main">
+            <!-- Left Panel - Preview -->
+            <div class="dtf-preview-panel">
+                <div class="dtf-preview-card">
+                    <h3>Design Preview</h3>
+                    <div class="dtf-preview-container">
+                        <canvas id="dtf-preview-canvas" class="dtf-preview-canvas"></canvas>
+                        <div class="dtf-zoom-controls">
+                            <button id="dtf-zoom-in" class="dtf-zoom-btn">+</button>
+                            <button id="dtf-zoom-out" class="dtf-zoom-btn">-</button>
+                            <button id="dtf-zoom-fit" class="dtf-zoom-btn">Fit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Controls -->
+            <div class="dtf-controls-panel">
+                <!-- Colors Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header" data-target="colors">
+                        <h3>Colors</h3>
+                        <span class="dtf-toggle">▼</span>
+                    </div>
+                    <div id="dtf-colors-content" class="dtf-block-content">
+                        <div class="dtf-color-controls">
+                            <label>Number of Colors: <input type="number" id="dtf-color-count" min="1" max="12" value="6"></label>
+                            <span class="dtf-color-info-text">(Detected: <span id="dtf-detected-colors">-</span>)</span>
+                            <label>Min %: <input type="number" id="dtf-min-percentage" min="0.1" max="10" step="0.1" value="1.0" style="width: 60px; margin-left: 10px;"></label>
+                            <button id="dtf-reanalyze-btn" class="dtf-btn dtf-btn-secondary">Re-analyze</button>
+                        </div>
+                        <div id="dtf-color-palette" class="dtf-color-palette"></div>
+                        <button id="dtf-add-color-btn" class="dtf-btn dtf-btn-secondary">Add Color</button>
+                    </div>
+                </div>
+
+                <!-- Size & PPI Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header" data-target="size">
+                        <h3>Size & PPI</h3>
+                        <span class="dtf-toggle">▼</span>
+                    </div>
+                    <div id="dtf-size-content" class="dtf-block-content">
+                        <div class="dtf-size-info">
+                            <div class="dtf-size-row">
+                                <label>Pixel Dimensions:</label>
+                                <span id="dtf-pixel-dimensions">-</span>
+                            </div>
+                            <div class="dtf-size-row">
+                                <label>PPI:</label>
+                                <input type="number" id="dtf-ppi" value="300" min="72" max="1200">
+                            </div>
+                            <div class="dtf-size-row">
+                                <label>Print Size:</label>
+                                <span id="dtf-print-size">-</span>
+                            </div>
+                        </div>
+                        <div id="dtf-size-warnings" class="dtf-warnings"></div>
+                    </div>
+                </div>
+
+                <!-- Background Removal Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header" data-target="background">
+                        <h3>Background Removal</h3>
+                        <span class="dtf-toggle">▼</span>
+                    </div>
+                    <div id="dtf-background-content" class="dtf-block-content">
+                        <div class="dtf-bg-controls">
+                            <label>
+                                <input type="checkbox" id="dtf-exclude-bg"> Exclude background from color analysis
+                            </label>
+                            <div class="dtf-bg-options">
+                                <button id="dtf-remove-bg" class="dtf-btn dtf-btn-primary">Remove Background</button>
+                            </div>
+                        </div>
+                        <div class="dtf-bg-preview">
+                            <button id="dtf-download-bg-removed" class="dtf-btn dtf-btn-primary">Download Background-Removed PNG</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resize & Export Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header" data-target="export">
+                        <h3>Resize & Export</h3>
+                        <span class="dtf-toggle">▼</span>
+                    </div>
+                    <div id="dtf-export-content" class="dtf-block-content">
+                        <div class="dtf-resize-controls">
+                            <label>
+                                <input type="checkbox" id="dtf-lock-aspect" checked> Lock aspect ratio
+                            </label>
+                            <div class="dtf-size-inputs">
+                                <div class="dtf-size-input-group">
+                                    <label>Width (inches):</label>
+                                    <input type="number" id="dtf-width-inches" step="0.01" min="0.1">
+                                    <span class="dtf-px-equivalent" id="dtf-width-px">-</span>
+                                </div>
+                                <div class="dtf-size-input-group">
+                                    <label>Height (inches):</label>
+                                    <input type="number" id="dtf-height-inches" step="0.01" min="0.1">
+                                    <span class="dtf-px-equivalent" id="dtf-height-px">-</span>
+                                </div>
+                            </div>
+                            <div class="dtf-export-buttons">
+                                <button id="dtf-apply-resize" class="dtf-btn dtf-btn-primary">Apply Resize</button>
+                                <button id="dtf-download-resized" class="dtf-btn dtf-btn-secondary">Download Resized PNG</button>
+                                <button id="dtf-export-job" class="dtf-btn dtf-btn-primary">Export Job JSON</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Edit Popup -->
+    <div id="dtf-color-popup" class="dtf-color-popup">
+        <div class="dtf-color-popup-content">
+            <button class="dtf-color-popup-close" id="dtf-color-popup-close">&times;</button>
+            <h3 class="dtf-color-popup-title">Edit Color</h3>
+            
+            <div class="dtf-color-preview" id="dtf-color-preview"></div>
+            
+            <div class="dtf-color-picker-wrapper">
+                <label>Color Picker:</label>
+                <input type="color" class="dtf-color-picker" id="dtf-color-picker">
+            </div>
+            
+            <div class="dtf-color-inputs">
+                <div class="dtf-color-input-group">
+                    <label>HEX Code:</label>
+                    <input type="text" id="dtf-color-hex-input" placeholder="#RRGGBB" maxlength="7">
+                    <div class="dtf-color-input-error" id="dtf-color-hex-error">Invalid HEX format</div>
+                </div>
+                <div class="dtf-color-input-group">
+                    <label>RGB Values:</label>
+                    <div class="dtf-rgb-inputs">
+                        <div class="dtf-rgb-input-item">
+                            <label>R:</label>
+                            <input type="number" id="dtf-color-r-input" min="0" max="255" placeholder="0">
+                        </div>
+                        <div class="dtf-rgb-input-item">
+                            <label>G:</label>
+                            <input type="number" id="dtf-color-g-input" min="0" max="255" placeholder="0">
+                        </div>
+                        <div class="dtf-color-input-item">
+                            <label>B:</label>
+                            <input type="number" id="dtf-color-b-input" min="0" max="255" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="dtf-color-input-error" id="dtf-color-rgb-error">Invalid RGB values (0-255)</div>
+                </div>
+            </div>
+            
+            <div class="dtf-color-popup-buttons">
+                <button class="dtf-btn dtf-btn-secondary" id="dtf-color-popup-cancel">Cancel</button>
+                <button class="dtf-btn dtf-btn-primary" id="dtf-color-popup-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

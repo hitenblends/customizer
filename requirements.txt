@@ -1,0 +1,8 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+opencv-python==4.8.1.78
+numpy>=1.21.0,<1.25.0
+scikit-learn>=1.0.0,<1.4.0
+Pillow>=9.0.0
+colorthief==0.2.1

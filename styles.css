@@ -1,0 +1,715 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #f8f9fa;
+}
+
+/* DTF Tool Container */
+.dtf-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    min-height: 100vh;
+}
+
+/* Header */
+.dtf-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 14px;
+}
+
+.dtf-header h1 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 2rem;
+}
+
+.dtf-upload-section {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dtf-file-input {
+    display: none;
+}
+
+.dtf-upload-btn {
+    background: #007bff;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-block;
+}
+
+.dtf-upload-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.dtf-reset-btn {
+    background: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.dtf-reset-btn:hover {
+    background: #545b62;
+}
+
+.dtf-file-info {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* Main Layout */
+.dtf-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .dtf-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Preview Panel */
+.dtf-preview-panel {
+    position: sticky;
+    top: 20px;
+}
+
+.dtf-preview-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e9ecef;
+}
+
+.dtf-preview-card h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.dtf-preview-container {
+    position: relative;
+    background: 
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dtf-preview-canvas {
+    max-width: 100%;
+    max-height: 400px;
+    cursor: grab;
+}
+
+.dtf-preview-canvas:active {
+    cursor: grabbing;
+}
+
+.dtf-zoom-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.dtf-zoom-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dtf-zoom-btn:hover {
+    background: #f8f9fa;
+}
+
+/* Controls Panel */
+.dtf-controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Block Styles */
+.dtf-block {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.dtf-block-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.2s ease;
+}
+
+.dtf-block-header:hover {
+    background: #e9ecef;
+}
+
+.dtf-block-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.dtf-toggle {
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.dtf-block-header.collapsed .dtf-toggle {
+    transform: rotate(-90deg);
+}
+
+.dtf-block-content {
+    padding: 20px;
+}
+
+.dtf-block-content.collapsed {
+    display: none;
+}
+
+/* Buttons */
+.dtf-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin: 5px 5px 5px 0;
+}
+
+.dtf-btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.dtf-btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.dtf-btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.dtf-btn-secondary:hover {
+    background: #545b62;
+}
+
+/* Color Palette */
+.dtf-color-controls {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dtf-color-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dtf-color-controls input[type="number"] {
+    width: 60px;
+    padding: 4px 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.dtf-color-info-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-left: 10px;
+}
+
+.dtf-color-info-text span {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.dtf-color-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.dtf-color-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.dtf-color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    border: 2px solid #dee2e6;
+    cursor: pointer;
+}
+
+.dtf-color-info {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.dtf-color-hex {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.dtf-color-percentage {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.dtf-color-controls-btns {
+    display: flex;
+    gap: 5px;
+}
+
+.dtf-color-controls-btns button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+}
+
+.dtf-color-lock {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.dtf-color-lock.locked {
+    background: #dc3545;
+}
+
+/* Size Controls */
+.dtf-size-info {
+    margin-bottom: 15px;
+}
+
+.dtf-size-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.dtf-size-row:last-child {
+    border-bottom: none;
+}
+
+.dtf-size-row input {
+    width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.dtf-warnings {
+    padding: 10px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    color: #856404;
+    font-size: 0.9rem;
+}
+
+/* Background Removal */
+.dtf-bg-controls {
+    margin-bottom: 20px;
+}
+
+.dtf-bg-controls label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.dtf-bg-options {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dtf-bg-manual-controls {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.dtf-bg-manual-controls label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.dtf-bg-manual-controls input[type="range"] {
+    width: 150px;
+}
+
+.dtf-bg-preview {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Resize Controls */
+.dtf-resize-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dtf-resize-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dtf-size-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.dtf-size-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dtf-size-input-group input {
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+
+.dtf-px-equivalent {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-family: monospace;
+}
+
+.dtf-export-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Form Elements */
+input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: #dee2e6;
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dtf-container {
+        padding: 15px;
+    }
+    
+    .dtf-header {
+        padding: 15px;
+    }
+    
+    .dtf-upload-section {
+        flex-direction: column;
+    }
+    
+    .dtf-size-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .dtf-export-buttons {
+        flex-direction: column;
+    }
+    
+    .dtf-color-palette {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Loading States */
+.dtf-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Error States */
+.dtf-error {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Success States */
+.dtf-success {
+    color: #28a745;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Color Edit Popup */
+.dtf-color-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dtf-color-popup.show {
+    display: flex;
+}
+
+.dtf-color-popup-content {
+    background: white;
+    border-radius: 14px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.dtf-color-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.dtf-color-popup-close:hover {
+    color: #333;
+}
+
+.dtf-color-popup-title {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.dtf-color-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 3px solid #dee2e6;
+    margin: 0 auto 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.dtf-color-picker-wrapper {
+    margin-bottom: 20px;
+}
+
+.dtf-color-picker {
+    width: 100%;
+    height: 40px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+}
+
+.dtf-color-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.dtf-color-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dtf-color-input-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.dtf-color-input-group input {
+    padding: 8px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.dtf-color-input-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.dtf-rgb-inputs {
+    display: flex;
+    gap: 8px;
+}
+
+.dtf-rgb-input-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.dtf-rgb-input-item label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6c757d;
+    text-align: center;
+}
+
+.dtf-rgb-input-item input {
+    padding: 6px 8px;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    text-align: center;
+    width: 100%;
+}
+
+.dtf-rgb-input-item input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.dtf-color-popup-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.dtf-color-popup-buttons .dtf-btn {
+    min-width: 80px;
+}
+
+.dtf-color-input-error {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 3px;
+    display: none;
+}
+
+.dtf-color-input-error.show {
+    display: block;
+}

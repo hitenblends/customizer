@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTF Customizer - Screen Printing Tool</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* DTF Customizer specific styles */
+        .dtf-tool {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .dtf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+        }
+        
+        .dtf-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .dtf-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .dtf-banner {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #8b4513;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .dtf-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .dtf-main {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Preview section */
+        .dtf-preview-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .dtf-preview-section h3 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 1.3rem;
+        }
+        
+        #dtf-preview {
+            width: 100%;
+            height: 400px;
+            background: #fff;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+        }
+        
+        #dtf-preview:active {
+            cursor: grabbing;
+        }
+        
+        /* Controls section */
+        .dtf-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .dtf-block {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .dtf-block-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dtf-block-content {
+            padding: 20px;
+        }
+        
+        /* File upload */
+        .dtf-file-upload {
+            text-align: center;
+            padding: 30px 20px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .dtf-file-upload:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+        
+        .dtf-file-upload input[type="file"] {
+            display: none;
+        }
+        
+        .dtf-file-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .dtf-file-label:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        /* Backend status */
+        #dtf-backend-status {
+            margin-bottom: 20px;
+        }
+        
+        .dtf-status-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .dtf-status-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        /* Color palette */
+        .dtf-palette-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .dtf-palette-header h3 {
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .dtf-palette-subtitle {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .dtf-color-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .dtf-color-item.dtf-matched {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .dtf-color-item.dtf-unmatched {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+        
+        .dtf-color-swatch {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+        
+        .dtf-color-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .dtf-palette-name {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 3px;
+        }
+        
+        .dtf-palette-category {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .dtf-detected-color {
+            font-weight: 600;
+            color: #dc3545;
+            margin-bottom: 3px;
+        }
+        
+        .dtf-no-match {
+            font-size: 0.85rem;
+            color: #dc3545;
+            margin-bottom: 5px;
+        }
+        
+        .dtf-similarity-score {
+            font-size: 0.8rem;
+            color: #28a745;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .dtf-color-values {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .dtf-hex {
+            font-family: monospace;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .dtf-rgb {
+            font-family: monospace;
+            color: #6c757d;
+        }
+        
+        .dtf-percentage {
+            font-weight: 600;
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .dtf-color-status {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        
+        .dtf-status-matched {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .dtf-status-unmatched {
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Consolidated color styles */
+        .dtf-consolidated {
+            border-left: 4px solid #ff6b35;
+            background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+        }
+        
+        .dtf-consolidated-info {
+            margin: 4px 0;
+            font-size: 0.85em;
+        }
+        
+        .dtf-consolidated-badge {
+            background: #ff6b35;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        .dtf-consolidated-count {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .dtf-color-item.dtf-consolidated .dtf-color-swatch {
+            border: 2px solid #ff6b35;
+            position: relative;
+        }
+        
+        .dtf-color-item.dtf-consolidated .dtf-color-swatch::after {
+            content: "🔗";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b35;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        /* Size and PPI */
+        .dtf-dimension-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .dtf-dimension-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dtf-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .dtf-value {
+            font-family: monospace;
+            color: #6c757d;
+        }
+        
+        .dtf-ppi-control {
+            margin-top: 15px;
+        }
+        
+        .dtf-ppi-control label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .dtf-ppi-control input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        /* Background removal */
+        .dtf-bg-controls {
+            text-align: center;
+        }
+        
+        .dtf-bg-controls button {
+            margin: 0 5px;
+        }
+        
+        #dtf-remove-bg {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #dtf-remove-bg:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        #dtf-reanalyze-colors {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #dtf-reanalyze-colors:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        /* Advanced options */
+        .dtf-advanced-options {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .dtf-option-group {
+            margin-bottom: 10px;
+        }
+        
+        .dtf-option-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .dtf-option-group input[type="checkbox"] {
+            margin: 0;
+        }
+        
+        .dtf-option-group input[type="range"] {
+            width: 100px;
+            margin: 0 10px;
+        }
+        
+        #dtf-sensitivity-value {
+            font-family: monospace;
+            font-weight: 600;
+            color: #007bff;
+            min-width: 30px;
+        }
+        
+        .dtf-apply-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .dtf-apply-btn:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+        
+        /* Background status */
+        .dtf-background-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .dtf-status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dtf-status-item .dtf-label {
+            font-weight: 600;
+        }
+        
+        .dtf-status-item .dtf-value {
+            font-family: monospace;
+            font-weight: 600;
+            color: #dc3545; /* Default to error color */
+        }
+        
+        .dtf-status-item.dtf-success .dtf-value {
+            color: #28a745; /* Success color */
+        }
+        
+        .dtf-status-item.dtf-warning .dtf-value {
+            color: #ffc107; /* Warning color */
+        }
+        
+        .dtf-status-item.dtf-info .dtf-value {
+            color: #007bff; /* Info color */
+        }
+        
+        /* Detected colors count */
+        .dtf-detected-colors {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .dtf-detected-colors.dtf-all-matched {
+            background: #28a745;
+        }
+        
+        .dtf-detected-colors.dtf-mostly-matched {
+            background: #17a2b8;
+        }
+        
+        .dtf-detected-colors.dtf-partially-matched {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .dtf-detected-colors.dtf-none-matched {
+            background: #dc3545;
+        }
+        
+        /* Production summary */
+        #dtf-production-summary {
+            margin-top: 15px;
+        }
+        
+        .dtf-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .dtf-message.dtf-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .dtf-message.dtf-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .dtf-message.dtf-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .dtf-message.dtf-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* Messages container */
+        #dtf-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .dtf-message {
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* No colors message */
+        .dtf-no-colors {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 40px 20px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dtf-tool {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .dtf-header h1 {
+                font-size: 2rem;
+            }
+            
+            .dtf-color-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .dtf-color-status {
+                text-align: center;
+            }
+        }
+        
+        /* Add production URL configuration */
+        :root {
+            --backend-url: 'https://your-render-app-name.onrender.com';
+            --local-backend: 'http://localhost:8000';
+            --use-local: true; /* Set to false for production */
+        }
+        
+        .backend-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        .backend-toggle:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- Backend Toggle -->
+    <div class="backend-toggle" onclick="toggleBackend()">
+        <span id="backend-status">Local</span>
+    </div>
+    
+    <div class="dtf-tool">
+        <!-- Header -->
+        <div class="dtf-header">
+            <h1>🎨 DTF Customizer</h1>
+            <p>Industry Standard Color Palette Matching for Screen Printing & DTF</p>
+        </div>
+        
+        <!-- Banner -->
+        <div class="dtf-banner">
+            ✨ Professional Color Matching: 50+ Industry-Standard Colors
+        </div>
+        
+        <!-- Backend Status -->
+        <div id="dtf-backend-status">
+            <div class="dtf-status-error">
+                <span>❌ Python Backend: Checking...</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="dtf-main">
+            <!-- Left: Preview Section -->
+            <div class="dtf-preview-section">
+                <h3>🖼️ Image Preview</h3>
+                <div id="dtf-preview">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d;">
+                        Upload an image to see preview
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Controls -->
+            <div class="dtf-controls">
+                <!-- File Upload Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header">
+                        📁 Upload Design
+                    </div>
+                    <div class="dtf-block-content">
+                        <div class="dtf-file-upload">
+                            <input type="file" id="dtf-file-input" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                            <label for="dtf-file-input" id="dtf-file-label">Choose Image File</label>
+                        </div>
+                        <p style="text-align: center; margin-top: 15px; color: #6c757d; font-size: 0.9rem;">
+                            Supports PNG, JPEG, WebP, SVG
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Colors Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header">
+                        🎨 Palette Colors
+                        <span id="dtf-detected-colors">-</span>
+                    </div>
+                    <div class="dtf-block-content">
+                        <div id="dtf-color-palette">
+                            <p class="dtf-no-colors">Upload an image to see color analysis</p>
+                        </div>
+                        <div id="dtf-production-summary"></div>
+                    </div>
+                </div>
+                
+                <!-- Size & PPI Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header">
+                        📏 Size & PPI
+                    </div>
+                    <div class="dtf-block-content">
+                        <div id="dtf-dimensions">
+                            <div class="dtf-dimension-item">
+                                <span class="dtf-label">Pixels:</span>
+                                <span class="dtf-value">-</span>
+                            </div>
+                            <div class="dtf-dimension-item">
+                                <span class="dtf-label">Print Size:</span>
+                                <span class="dtf-value">-</span>
+                            </div>
+                        </div>
+                        <div class="dtf-ppi-control">
+                            <label for="dtf-ppi">PPI (Pixels Per Inch):</label>
+                            <input type="number" id="dtf-ppi" value="300" min="72" max="600" step="1">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Background Removal Block -->
+                <div class="dtf-block">
+                    <div class="dtf-block-header">
+                        🗑️ Background Removal
+                    </div>
+                    <div class="dtf-block-content">
+                        <div class="dtf-background-status" id="dtf-background-status">
+                            <div class="dtf-status-item">
+                                <span class="dtf-label">Status:</span>
+                                <span class="dtf-value" id="dtf-bg-status">Unknown</span>
+                            </div>
+                            <div class="dtf-status-item" id="dtf-bg-details" style="display: none;">
+                                <span class="dtf-label">Details:</span>
+                                <span class="dtf-value" id="dtf-bg-details-text"></span>
+                            </div>
+                        </div>
+                        <div class="dtf-bg-controls">
+                            <button id="dtf-remove-bg">Remove Background (AI-Powered)</button>
+                            <button id="dtf-remove-bg-advanced">Advanced AI Removal</button>
+                            <button id="dtf-reanalyze-colors">Re-analyze Colors</button>
+                        </div>
+                        <div class="dtf-advanced-options" id="dtf-advanced-options" style="display: none;">
+                            <div class="dtf-option-group">
+                                <label>
+                                    <input type="checkbox" id="dtf-preserve-text" checked>
+                                    Preserve Text & Outlines
+                                </label>
+                            </div>
+                            <div class="dtf-option-group">
+                                <label>
+                                    Edge Sensitivity:
+                                    <input type="range" id="dtf-edge-sensitivity" min="0.05" max="0.3" step="0.05" value="0.1">
+                                    <span id="dtf-sensitivity-value">0.1</span>
+                                </label>
+                            </div>
+                            <div class="dtf-option-group">
+                                <button id="dtf-apply-advanced" class="dtf-apply-btn">Apply Advanced AI Removal</button>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 15px; color: #6c757d; font-size: 0.9rem;">
+                            AI-powered background removal using rembg - preserves text and outlines automatically
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Messages Container -->
+    <div id="dtf-messages"></div>
+    
+    <!-- JavaScript -->
+    <script src="dtf-customizer.js"></script>
+</body>
+</html>

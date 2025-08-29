@@ -1,9 +1,20 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.6
-opencv-python==4.8.1.78
-numpy==1.24.3
-scikit-learn==1.3.0
-Pillow==10.0.1
-colorthief==0.2.1
-python-jose[cryptography]==3.3.0
+# Production Dependencies for Render Hosting
+# Core libraries for the DTF Color Extractor
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Image processing
+Pillow>=9.0.0
+opencv-python-headless>=4.8.0  # Headless version for server deployment
+numpy>=1.24.0
+
+# Background removal
+rembg>=2.0.0
+
+# File handling
+python-multipart>=0.0.6
+
+# Optional: For better performance
+# opencv-contrib-python-headless>=4.8.0

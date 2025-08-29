@@ -1,176 +1,194 @@
-# DTF Color Extractor Backend
+# Background Removal System
 
-Advanced color extraction backend using Python, FastAPI, OpenCV, and scikit-learn for professional DTF and screen printing color analysis.
+This directory contains a robust background removal solution using the `rembg` library with OpenCV post-processing for clean, production-ready results.
 
 ## 🚀 Features
 
-- **Advanced Color Extraction**: Uses OpenCV and scikit-learn for professional-grade color analysis
-- **LAB Color Space**: Better color similarity detection using perceptual color space
-- **Smart Filtering**: Automatically filters out noise and insignificant colors
-- **Color Merging**: Intelligently merges visually similar colors
-- **Percentage Thresholds**: Configurable minimum percentage filters
-- **Multiple Formats**: Supports PNG, JPG, JPEG, WebP
-- **RESTful API**: Clean HTTP endpoints for easy integration
+- **Deep Learning Background Removal**: Uses `rembg`'s U2Net model for accurate background detection
+- **OpenCV Post-Processing**: Advanced edge refinement and artifact removal
+- **Color Decontamination**: Eliminates background color bleeding
+- **Soft Edges**: Configurable alpha blur for better printing results
+- **Fallback Support**: Automatic fallback to OpenCV method if rembg fails
+
+## 📁 Files
+
+- **`background_remover.py`** - Main BackgroundRemover class
+- **`cli.py`** - Command-line interface
+- **`main.py`** - FastAPI integration (updated)
+- **`requirements.txt`** - Dependencies
+- **`test_background_remover.py`** - Test script
 
 ## 🛠️ Installation
 
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-### Setup
 1. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
 
-2. **Start the server**:
+2. **Verify installation**:
    ```bash
-   python start.py
+   python3 test_background_remover.py
    ```
 
-3. **Access the API**:
-   - **Server**: http://localhost:8000
-   - **API Docs**: http://localhost:8000/docs
-   - **Health Check**: http://localhost:8000/health
+## 🎯 Usage
 
-## 📡 API Endpoints
+### As a Python Class
 
-### POST `/extract-colors`
-Extract dominant colors from an uploaded image.
+```python
+from background_remover import BackgroundRemover
 
-**Parameters**:
-- `file`: Image file (PNG, JPG, JPEG, WebP)
-- `num_colors`: Maximum number of colors (1-20, default: 12)
-- `min_percentage`: Minimum percentage threshold (0.1-10.0, default: 1.0)
-- `merge_threshold`: Color similarity threshold (10-100, default: 30.0)
+# Initialize with default settings
+remover = BackgroundRemover()
 
-**Response**:
-```json
-{
-  "success": true,
-  "colors": [
-    {
-      "rgb": [255, 0, 0],
-      "hex": "#ff0000",
-      "percentage": 25.5,
-      "name": "Red"
-    }
-  ],
-  "total_colors": 1,
-  "total_pixels_analyzed": 1000000,
-  "algorithm": "Advanced K-means with LAB similarity merging",
-  "settings": {
-    "requested_colors": 12,
-    "min_percentage": 1.0,
-    "merge_threshold": 30.0
-  }
-}
+# Process a single image
+result = remover.remove_background("input.png", "output.png")
+
+# Process a folder
+remover.process_folder("input_folder/", "output_folder/")
 ```
 
-## 🔧 Configuration
+### Command Line Interface
 
-### Environment Variables
-- `PORT`: Server port (default: 8000)
-- `HOST`: Server host (default: 0.0.0.0)
-
-### Algorithm Parameters
-- **num_colors**: How many colors to extract (1-20)
-- **min_percentage**: Minimum percentage for a color to be included
-- **merge_threshold**: LAB color space similarity threshold for merging
-
-## 🎨 How It Works
-
-1. **Image Loading**: Uses OpenCV for fast image processing
-2. **Pixel Analysis**: Converts image to RGB pixel array
-3. **Noise Filtering**: Removes very light/dark pixels that might be noise
-4. **K-means Clustering**: Advanced clustering with multiple initializations
-5. **LAB Color Space**: Converts to LAB for perceptual color similarity
-6. **Smart Merging**: Merges visually similar colors using LAB distance
-7. **Percentage Calculation**: Accurate pixel count percentages
-8. **Result Filtering**: Applies minimum percentage thresholds
-
-## 🚀 Deployment
-
-### Local Development
 ```bash
-python start.py
+# Process single file
+python3 cli.py input.png -o output.png
+
+# Process folder
+python3 cli.py input_folder/ -o output_folder/
+
+# Custom settings
+python3 cli.py input.png -o output.png --strength 0.8 --no-blur
 ```
 
-### Production (Gunicorn)
+### FastAPI Integration
+
+The background removal is now integrated into the main FastAPI server:
+
 ```bash
-pip install gunicorn
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+# Start server
+python3 start.py
+
+# Use the /remove-background endpoint
+curl -X POST "http://localhost:8000/remove-background" \
+     -F "file=@input.png"
 ```
 
-### Docker
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["python", "start.py"]
+## ⚙️ Configuration Options
+
+### BackgroundRemover Parameters
+
+- **`alpha_blur`** (bool): Apply Gaussian blur to alpha channel for soft edges
+- **`erode_dilate`** (bool): Apply morphological operations to clean alpha channel
+- **`color_decontamination`** (bool): Remove background color contamination
+- **`post_process_strength`** (float): Strength of post-processing (0.0 to 1.0)
+
+### CLI Options
+
+- **`--no-blur`**: Disable alpha blur
+- **`--no-erode`**: Disable morphological operations
+- **`--no-decontamination`**: Disable color decontamination
+- **`--strength`**: Post-processing strength (0.0 to 1.0)
+
+## 🔧 Advanced Usage
+
+### Custom Post-Processing
+
+```python
+# High-quality settings for screen printing
+remover = BackgroundRemover(
+    alpha_blur=True,           # Soft edges
+    erode_dilate=True,         # Clean artifacts
+    color_decontamination=True, # Remove color bleeding
+    post_process_strength=0.7   # Strong processing
+)
 ```
 
-## 🔗 Frontend Integration
+### Batch Processing
 
-Update your frontend to use the backend API:
+```python
+# Process multiple folders
+folders = ["designs/", "logos/", "artwork/"]
+for folder in folders:
+    remover.process_folder(folder, f"processed_{folder}")
+```
 
-```javascript
-async function extractColorsBackend(imageFile) {
-    const formData = new FormData();
-    formData.append('file', imageFile);
-    formData.append('num_colors', 12);
-    formData.append('min_percentage', 1.0);
-    formData.append('merge_threshold', 30.0);
-    
-    try {
-        const response = await fetch('http://localhost:8000/extract-colors', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Update UI with backend results
-            updateColorPalette(result.colors);
-            updateColorCount(result.total_colors);
-        }
-        
-    } catch (error) {
-        console.error('Backend processing failed:', error);
-        // Fallback to frontend method
-    }
-}
+### Error Handling
+
+```python
+try:
+    result = remover.remove_background("input.png")
+except Exception as e:
+    print(f"Background removal failed: {e}")
+    # Handle error appropriately
 ```
 
 ## 📊 Performance
 
-- **Processing Speed**: 2-5 seconds for 1MP images
-- **Memory Usage**: Efficient pixel processing with numpy
-- **Accuracy**: Professional-grade color analysis
-- **Scalability**: Handles multiple concurrent requests
+- **Speed**: ~2-5 seconds per image (depending on size and complexity)
+- **Memory**: ~500MB-1GB RAM usage during processing
+- **Quality**: Professional-grade results suitable for screen printing
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
-1. **OpenCV not found**: Install with `pip install opencv-python`
-2. **Memory errors**: Reduce image size or increase system memory
-3. **Slow processing**: Check image dimensions and reduce if necessary
 
-### Debug Mode
-Enable debug logging by setting log level:
+1. **Import Error**: Ensure all dependencies are installed
+   ```bash
+   pip3 install rembg Pillow numpy opencv-python
+   ```
+
+2. **Memory Issues**: For large images, try reducing post-processing strength
+   ```python
+   remover = BackgroundRemover(post_process_strength=0.3)
+   ```
+
+3. **Quality Issues**: Adjust settings based on image type
+   ```python
+   # For text-heavy images
+   remover = BackgroundRemover(alpha_blur=False, erode_dilate=True)
+   
+   # For smooth graphics
+   remover = BackgroundRemover(alpha_blur=True, erode_dilate=False)
+   ```
+
+### Fallback Mode
+
+If `rembg` fails, the system automatically falls back to the OpenCV method:
+
 ```python
-uvicorn.run(app, log_level="debug")
+# The fallback is automatic, but you can force it:
+remover = BackgroundRemover(post_process_strength=0.0)
 ```
 
-## 📝 License
+## 🔄 Integration with Existing Code
 
-This project is part of the DTF Customizer tool suite.
+The new system is designed to be a drop-in replacement:
+
+```python
+# Old way (still works)
+result = self.remove_background_grabcut(image_path)
+
+# New way (better quality)
+from background_remover import BackgroundRemover
+remover = BackgroundRemover()
+result = remover.remove_background(image_path)
+```
+
+## 📈 Future Improvements
+
+- **GPU Acceleration**: CUDA support for faster processing
+- **Batch Processing**: Parallel processing of multiple images
+- **Custom Models**: Support for custom U2Net models
+- **API Endpoints**: Additional processing options via FastAPI
 
 ## 🤝 Contributing
 
-Feel free to submit issues and enhancement requests!
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is part of the DTF Customizer system.

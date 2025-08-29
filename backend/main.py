@@ -693,59 +693,65 @@ class PaletteBasedColorExtractor:
 
     def remove_background_rembg_improved(self, image_path: str) -> str:
         """
-        Background removal using rembg with optimized settings for text preservation
+        Lightweight background removal using OpenCV (memory-efficient)
         """
         try:
-            print(f"🔍 [REMBG] Starting rembg background removal for: {image_path}")
-            
-            from rembg import remove, new_session
-            from PIL import Image
+            print(f"🔍 [OPENCV] Starting OpenCV background removal for: {image_path}")
             
             # Load image
-            input_image = Image.open(image_path)
-            print(f"🔍 [REMBG] Image loaded: {input_image.size}, mode: {input_image.mode}")
+            img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+            if img is None:
+                raise ValueError("Could not load image")
             
-            # Try different models with different settings
-            print(f"🔍 [REMBG] Attempting method 1: rembg default model...")
+            print(f"🔍 [OPENCV] Image loaded: {img.shape}")
             
-            try:
-                # Method 1: Default model (less aggressive, better for text)
-                result_image = remove(input_image)
-                print(f"✅ [REMBG] Default model successful")
-                
-            except Exception as e1:
-                print(f"❌ [REMBG] Default model failed: {e1}")
-                
-                try:
-                    # Method 2: u2net model with specific settings
-                    print(f"🔍 [REMBG] Attempting method 2: u2net model...")
-                    session = new_session('u2net')
-                    result_image = remove(input_image, session=session)
-                    print(f"✅ [REMBG] u2net model successful")
-                    
-                except Exception as e2:
-                    print(f"❌ [REMBG] u2net model failed: {e2}")
-                    raise Exception(f"Both rembg models failed: {e1}, {e2}")
+            # Convert to different color spaces for analysis
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
-            # Save the result
+            # Method 1: Simple color-based background removal (white/light backgrounds)
+            # Create mask for white/light backgrounds
+            lower_white = np.array([0, 0, 200])  # HSV
+            upper_white = np.array([180, 30, 255])
+            white_mask = cv2.inRange(hsv, lower_white, upper_white)
+            
+            # Method 2: Edge-based approach for better results
+            # Find edges to preserve important content
+            edges = cv2.Canny(gray, 50, 150)
+            
+            # Dilate edges to create regions of interest
+            kernel = np.ones((3,3), np.uint8)
+            edges_dilated = cv2.dilate(edges, kernel, iterations=2)
+            
+            # Combine white mask with edge preservation
+            # Keep areas near edges even if they're white
+            protected_mask = cv2.bitwise_not(edges_dilated)
+            final_bg_mask = cv2.bitwise_and(white_mask, protected_mask)
+            
+            # Create alpha channel
+            alpha = np.where(final_bg_mask > 0, 0, 255).astype(np.uint8)
+            
+            # Create RGBA image
+            rgba_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+            rgba_img[:, :, 3] = alpha
+            
+            # Save result
             output_path = image_path.replace('.png', '_bg_removed.png').replace('.jpg', '_bg_removed.png').replace('.jpeg', '_bg_removed.png')
-            result_image.save(output_path, 'PNG')
+            cv2.imwrite(output_path, rgba_img)
             
-            print(f"✅ [REMBG] Background removal completed: {output_path}")
-            print(f"✅ [REMBG] Result image size: {result_image.size}, mode: {result_image.mode}")
+            # Calculate transparency stats
+            transparent_pixels = np.sum(alpha == 0)
+            total_pixels = alpha.shape[0] * alpha.shape[1]
+            transparency_ratio = transparent_pixels / total_pixels
             
-            # Check transparency
-            import numpy as np
-            result_array = np.array(result_image)
-            if len(result_array.shape) == 3 and result_array.shape[2] == 4:
-                transparency = np.sum(result_array[:, :, 3] < 128) / (result_array.shape[0] * result_array.shape[1]) * 100
-                print(f"📊 [REMBG] Transparency achieved: {transparency:.1f}%")
+            print(f"✅ [OPENCV] Background removal completed: {output_path}")
+            print(f"📊 [OPENCV] Transparency achieved: {transparency_ratio*100:.1f}%")
             
             return output_path
             
         except Exception as e:
-            print(f"❌ [REMBG] Background removal failed: {str(e)}")
-            print(f"❌ [REMBG] Error details: {type(e).__name__}: {e}")
+            print(f"❌ [OPENCV] Background removal failed: {str(e)}")
+            print(f"❌ [OPENCV] Error details: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
             raise HTTPException(status_code=500, detail=f"Background removal failed: {str(e)}")

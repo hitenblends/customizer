@@ -96,7 +96,7 @@ function setupEventListeners() {
 // Check if Python backend is available
 async function checkBackendStatus() {
     try {
-        const response = await fetch('http://localhost:8000/health');
+        const response = await fetch('https://dtf-customizer-backend.onrender.com/health');
         if (response.ok) {
             const data = await response.json();
             updateBackendStatus(true, data);
@@ -187,7 +187,7 @@ async function extractColorsWithPalette(img) {
         formData.append('min_percentage', '1.0');
         
         console.log('📤 Sending image to Python backend for palette matching...');
-        const response = await fetch('http://localhost:8000/extract-colors', {
+        const response = await fetch('https://dtf-customizer-backend.onrender.com/extract-colors', {
             method: 'POST',
             body: formData
         });
@@ -378,13 +378,13 @@ function showProductionSummary(matchedCount, totalCount) {
     summaryContainer.innerHTML = `<div class="dtf-message dtf-${type}">${message}</div>`;
 }
 
-// Remove background
+// Remove background (simplified)
 async function removeBackground() {
     if (!state.image) return;
     
     try {
-        console.log('🔄 Checking background status...');
-        showMessage('🔍 Analyzing background status...', 'info');
+        console.log('🔄 Removing background...');
+        showMessage('🔄 Removing background with AI...', 'info');
         
         // Convert image to blob
         const canvas = document.createElement('canvas');
@@ -395,53 +395,26 @@ async function removeBackground() {
         
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         
-        // First, detect background status
-        const detectFormData = new FormData();
-        detectFormData.append('file', blob, 'image.png');
-        
-        const detectResponse = await fetch('http://localhost:8000/detect-background', {
-            method: 'POST',
-            body: detectFormData
-        });
-        
-        if (!detectResponse.ok) {
-            throw new Error(`Background detection failed: ${detectResponse.status}`);
-        }
-        
-        const detectResult = await detectResponse.json();
-        
-        if (detectResult.success && detectResult.background_status.background_removed) {
-            // Background is already removed
-            const status = detectResult.background_status;
-            const confidence = status.confidence;
-            const transparency = (status.transparency_ratio * 100).toFixed(1);
-            
-            // Update UI status
-            updateBackgroundStatus('removed', status);
-            
-            showMessage(`✅ Background already removed! (${confidence} confidence, ${transparency}% transparent)`, 'success');
-            return;
-        }
-        
-        // Background not removed, proceed with removal
-        updateBackgroundStatus('present', detectResult.background_status);
-        showMessage('🔄 Removing background...', 'info');
-        
         // Send to Python backend for background removal
         const formData = new FormData();
         formData.append('file', blob, 'image.png');
-        formData.append('method', 'grabcut');
+        formData.append('method', 'rembg');
+        formData.append('model', 'u2net');
+        formData.append('post_process', 'false');
         
-        const response = await fetch('http://localhost:8000/remove-background', {
+        const response = await fetch('https://dtf-customizer-backend.onrender.com/remove-background', {
             method: 'POST',
             body: formData
         });
         
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Backend error:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result = await response.json();
+        console.log('📥 Background removal result:', result);
         
         if (result.success) {
             // Load background-removed image
@@ -455,13 +428,11 @@ async function removeBackground() {
                 // Update background status to removed
                 updateBackgroundStatus('removed', {
                     confidence: 'high',
-                    transparency_ratio: 0.8  // Assume good transparency after removal
+                    transparency_ratio: 0.8,
+                    method: result.method || 'rembg'
                 });
                 
                 showMessage('✅ Background removed successfully!', 'success');
-                
-                // Note: Colors are not automatically re-analyzed after background removal
-                // User can manually re-analyze colors if needed
             };
             
             newImg.src = imgData;
@@ -472,7 +443,7 @@ async function removeBackground() {
         
     } catch (error) {
         console.error('❌ Background removal failed:', error);
-        showMessage('Background removal failed. Using original image.', 'error');
+        showMessage(`Background removal failed: ${error.message}`, 'error');
     }
 }
 
@@ -505,7 +476,7 @@ async function removeBackgroundAdvanced() {
         formData.append('preserve_text', preserveText);
         formData.append('edge_sensitivity', edgeSensitivity);
         
-        const response = await fetch('http://localhost:8000/remove-background-advanced', {
+        const response = await fetch('https://dtf-customizer-backend.onrender.com/remove-background-advanced', {
             method: 'POST',
             body: formData
         });
